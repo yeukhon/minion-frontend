@@ -375,11 +375,14 @@ def persona_login():
         return jsonify(success=False)
     if request.json.get('invite_id'):
         user = accept_invite(receipt['email'], request.json)
+        if not user:
+            return jsonify(success=False)
+        user = login_or_create_user(user['email'])
     else:
         user = login_or_create_user(receipt['email'])
-    if not user:
-        return jsonify(success=False)
-    elif user.get('status') == "banned":
+        if not user:
+            return jsonify(success=False)
+    if user.get('status') == "banned":
         return jsonify(success=False, reason="banned")
     session['email'] = user['email']
     session['role'] = user['role']
